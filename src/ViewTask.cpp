@@ -342,39 +342,43 @@ std::string ViewTask::render (std::vector <Task>& data, std::vector <int>& seque
       }
     }
 
+    std::string current_task;
+
     for (unsigned int i = 0; i < max_lines; ++i)
     {
-      out += left_margin + (odd ? extra_odd : extra_even);
+      current_task += left_margin + (odd ? extra_odd : extra_even);
 
       for (unsigned int c = 0; c < _columns.size (); ++c)
       {
         if (c)
         {
           if (row_color.nontrivial ())
-            row_color._colorize (out, intra);
+            row_color._colorize (current_task, intra);
           else
-            out += (odd ? intra_odd : intra_even);
+            current_task += (odd ? intra_odd : intra_even);
         }
 
         if (i < cells[c].size ())
-          out += cells[c][i];
+          current_task += cells[c][i];
         else
-          row_color._colorize (out, std::string (widths[c], ' '));
+          row_color._colorize (current_task, std::string (widths[c], ' '));
       }
 
-      out += (odd ? extra_odd : extra_even);
+      current_task += (odd ? extra_odd : extra_even);
 
       // Trim right.
-      out.erase (out.find_last_not_of (" ") + 1);
-      out += "\n";
+      current_task.erase (current_task.find_last_not_of (" ") + 1);
+      current_task += "\n";
 
       // Stop if the line limit is exceeded.
       if (++_lines >= _truncate_lines && _truncate_lines != 0)
       {
         Context::getContext ().time_render_us += timer.total_us ();
+	  out = current_task + out;
         return out;
       }
     }
+    out = current_task + out;
 
     cells.clear ();
 
